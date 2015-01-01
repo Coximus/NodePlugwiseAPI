@@ -17,6 +17,7 @@ var handler = function(request, response) {
         return response.json({error: 'Invalid state requested'});
     }
 
+    this.Plugwise = this.Plugwise ? this.Plugwise : require('NodePlugwise');
     this.Plugwise.switchPlug(request.params.address, parseInt(request.params.state), function(error, plugwiseResponse) {
         if (error) {
             response.status(500);
@@ -28,6 +29,5 @@ var handler = function(request, response) {
 }
 
 module.exports = {
-    handler: handler,
-    Plugwise: require('NodePlugwise')
+    handler: handler
 }
