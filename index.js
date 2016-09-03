@@ -11,6 +11,10 @@ var connectToPlugwise = function(serial, callback) {
     });
 }
 
+var callSwitchPlug = function(plugId, desiredState, callback) {
+    plugwise.switchPlug(plugId, desiredState, callback);
+}
+
 module.exports = {
     connect: function(serial, callback) {
         connectToPlugwise(serial, function(error, plugwise) {
@@ -18,5 +22,11 @@ module.exports = {
                 callback(error, plugwise);
             }
         });
-    } 
+    },
+    switchPlug: function(plugId, desiredState, callback) {
+        if(plugwise && plugwise.connected) {
+            return callSwitchPlug(plugId, desiredState, callback);
+        }
+        return callback('Plugwise not connected');
+    }
 };

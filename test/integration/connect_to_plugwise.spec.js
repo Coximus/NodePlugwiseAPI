@@ -8,17 +8,17 @@ describe('Integration - Plugwise - Connect', function() {
     var plugwiseInstance; 
 
     beforeEach(function() {
-        plugwiseInstance = Plugwise.getInstance();
+        plugwiseInstance = new Plugwise();
+        sinon.stub(Plugwise, 'getInstance', function() {return plugwiseInstance});
     });
 
     afterEach(function() {
-        var instance = Plugwise.getInstance();
-        if(instance.connect.restore) {
-            instance.connect.restore();
+        if(Plugwise.getInstance.restore) {
+            Plugwise.getInstance.restore();
         }
     });
 
-    stubConnect = function(callbackValue) {
+    var stubConnect = function(callbackValue) {
         return sinon.stub(plugwiseInstance, 'connect', function(serial, callback) {
             callback(callbackValue);
         });

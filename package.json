@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/Coximus/NodePlugwiseAPI",
   "dependencies": {
-      "NodePlugwise": "x.x.x"
+      "NodePlugwise": "^1.0.2"
   },
   "devDependencies": {
       "assert": "^1.3.0",
