@@ -1,32 +1,37 @@
-var Plugwise = require('NodePlugwise'),
-    plugwise;
+var Plugwise = require('NodePlugwise');
+var express = require('express');
+var app = express();
 
-var connectToPlugwise = function(serial, callback) {
-    plugwise = Plugwise.getInstance();
-    plugwise.connect(serial, function(error) {
-        if(error) {
-            return callback(error);
+app.get('/', function (req, res) {
+    res.send('Hello World!');
+});
+
+app.get('/on', function (req, res) {
+    Plugwise.switchPlug('000D6F0000768D95', 1, function(error, response) {
+        if (error) {
+            return res.json({error: 'Failed to switch plug'});
         }
-        return callback(null, plugwise);
+
+        res.json(response);
     });
-}
+});
 
-var callSwitchPlug = function(plugId, desiredState, callback) {
-    plugwise.switchPlug(plugId, desiredState, callback);
-}
-
-module.exports = {
-    connect: function(serial, callback) {
-        connectToPlugwise(serial, function(error, plugwise) {
-            if(callback) {
-                callback(error, plugwise);
-            }
-        });
-    },
-    switchPlug: function(plugId, desiredState, callback) {
-        if(plugwise && plugwise.connected) {
-            return callSwitchPlug(plugId, desiredState, callback);
+app.get('/off', function (req, res) {
+    Plugwise.switchPlug('000D6F0000768D95', 0, function(error, response) {
+        if (error) {
+            return res.json({error: 'Failed to switch plug'});
         }
-        return callback('Plugwise not connected');
+
+        res.json(response);
+    });
+});
+
+Plugwise.connect('/dev/tty.usbserial-A700drEa', function(error, plugwise) { 
+    if (error) {
+        return console.error(error);
     }
-};
+
+    app.listen(3000, function () {
+        console.log('Example app listening on port 3000!');
+    });
+});
