@@ -16,9 +16,8 @@ var handler = function(request, response) {
         response.status(500);
         return response.json({error: 'Invalid state requested'});
     }
-console.log('got here');
+
     this.Plugwise.switchPlug(request.params.address, parseInt(request.params.state), function(error, plugwiseResponse) {
-        console.log('then got here', error, plugwiseResponse);
         if (error) {
             response.status(500);
             return response.json({error: error});
