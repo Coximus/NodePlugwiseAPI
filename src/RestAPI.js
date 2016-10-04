@@ -8,6 +8,8 @@ process.on('uncaughtException', function(err) {
     throw err;
 });
 
+var services = [];
+
 var start = function(port, callback) {
     port = port ? port : 3000;
     this.app = this.app ? this.app : express();
@@ -15,8 +17,12 @@ var start = function(port, callback) {
     this.app.listen(port, callback);
 }
 
+var getServices = function() {
+    return services;
+}
+
 var handleServiceRegistration = function(error, service) {
-    
+    services.push(service);
 }
 
 var setupServices = function(services, callback) {
@@ -38,5 +44,6 @@ var setupServices = function(services, callback) {
 module.exports = {
     start: start,
     setupServices: setupServices,
-    app: null
+    app: null,
+    getServices: getServices
 }

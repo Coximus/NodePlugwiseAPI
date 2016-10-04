@@ -53,8 +53,13 @@ describe('RestAPI', function() {
                 setup: {someKey: 'someValue'}
             }];
 
-            sinon.spy(mockServiceInstance, 'setup');
+            mockServiceInstance.setup = function(config, callback) {
+                return callback();
+            }
+            
+            assert.equal(0, RestAPI.getServices().length);
             RestAPI.setupServices(services);
+            assert.equal(1, RestAPI.getServices().length);
         });
     });
 });

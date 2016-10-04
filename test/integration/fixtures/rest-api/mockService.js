@@ -1,6 +1,5 @@
-var setup = function(config, callback) {
-    callback();
-}
+var setup = function(){};
+
 
 module.exports = {
     setup: setup
