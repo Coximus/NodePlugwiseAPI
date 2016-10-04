@@ -1,5 +1,7 @@
-var sinon = require('sinon');
+var setup = function(config, callback) {
+    callback();
+}
 
 module.exports = {
-    setup: sinon.spy()
+    setup: setup
 }

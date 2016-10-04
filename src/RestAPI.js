@@ -15,10 +15,14 @@ var start = function(port, callback) {
     this.app.listen(port, callback);
 }
 
+var handleServiceRegistration = function(error, service) {
+    
+}
+
 var setupServices = function(services, callback) {
     services.forEach(function(service) {
         var instance = require(service.module);
-        instance.setup();
+        instance.setup(service.setup, handleServiceRegistration);
         // instance.connect('/dev/tty.usbserial-A700drEa', function(error, plugwise) { 
         //     if (error) {
         //         return console.error(error);
