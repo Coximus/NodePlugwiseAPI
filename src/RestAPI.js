@@ -1,4 +1,5 @@
-var express = require('express');
+var express = require('express'),
+    Plugwise = require('NodePlugwise');
 
 process.on('uncaughtException', function(err) {
     if (err.errno === 'EACCES') {
@@ -8,42 +9,16 @@ process.on('uncaughtException', function(err) {
     throw err;
 });
 
-var services = [];
-
-var start = function(port, callback) {
-    port = port ? port : 3000;
+var start = function(config, callback) {
+    var port = config && config.expressPort ? config.expressPort : 3000;
+    var serialPath = config && config.serialPath ? config.serialPath : null;
     this.app = this.app ? this.app : express();
+    this.plugwise = this.plugwise ? this.plugwise : Plugwise;
 
     this.app.listen(port, callback);
-}
-
-var getServices = function() {
-    return services;
-}
-
-var handleServiceRegistration = function(error, service) {
-    services.push(service);
-}
-
-var setupServices = function(services, callback) {
-    services.forEach(function(service) {
-        var instance = require(service.module);
-        instance.setup(service.setup, handleServiceRegistration);
-        // instance.connect('/dev/tty.usbserial-A700drEa', function(error, plugwise) { 
-        //     if (error) {
-        //         return console.error(error);
-        //     }
-
-        //     this.app.get('/switch-plugwise/:address/:state', function(request, response) {
-        //         return routes.switchController.handler(request, response);
-        //     });
-        // }.bind(this));
-    }.bind(this));
+    this.plugwise.connect(serialPath);
 }
 
 module.exports = {
-    start: start,
-    setupServices: setupServices,
-    app: null,
-    getServices: getServices
+    start: start
 }
