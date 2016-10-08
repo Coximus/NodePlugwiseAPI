@@ -2,9 +2,19 @@ var sinon = require('sinon');
 var assert = require('assert');
 var RestAPI = require('../../../src/RestAPI');
 var Plugwise = require('NodePlugwise');
+var express = require('express');
 
 describe('RestAPI', function() {
+
+    var app = express();
+
     afterEach(function() {
+        if(RestAPI.app && RestAPI.app.listen && RestAPI.app.listen.restore) {
+             RestAPI.app.listen.restore();
+        }
+        if(RestAPI.app && RestAPI.app.get && RestAPI.app.get.restore) {
+             RestAPI.app.get.restore();
+        }
         if(RestAPI.app && RestAPI.app.start && RestAPI.app.start.restore) {
              RestAPI.app.start.restore();
         }
@@ -13,8 +23,14 @@ describe('RestAPI', function() {
         }
     });
 
-    var spyOnExpress = function() {
-        RestAPI.app = { listen: sinon.spy(), get: sinon.spy() };
+    var stubListen = function(callbackError, callbackSuccess) {
+        sinon.stub(app, 'listen').callsArgWith(1, callbackError, callbackSuccess);
+        RestAPI.app = app;
+    }
+
+    var spyOnGet = function() {
+        sinon.stub(app, 'get');
+        RestAPI.app = app;
     }
 
     var spyOnPlugwise = function() {
@@ -27,50 +43,46 @@ describe('RestAPI', function() {
 
     describe('start', function() {
         describe('express', function() {
-            it('should call express.listen with the correct port and callback', function() {
-                spyOnExpress();
+            it('should call express.listen with the correct port', function() {
+                stubListen('error');
                 var callback = function(){};
 
                 RestAPI.start({expressPort: 20}, callback);
                 
                 assert.equal(1, RestAPI.app.listen.callCount);
                 assert.equal(20, RestAPI.app.listen.firstCall.args[0]);
-                assert.equal(callback, RestAPI.app.listen.firstCall.args[1]);
             });
 
-            it('should call express.listen with the correct port and no callback when a callback is not passed', function() {
-                var callback = function(){};
-                spyOnExpress();
-                stubPlugwise(null, {});
+            it('should call the callback with an error if listen fails', function(done) {
+                stubListen('some error');
 
-                RestAPI.start({expressPort: 21});
-                
-                assert.equal(1, RestAPI.app.listen.callCount);
-                assert.equal(21, RestAPI.app.listen.firstCall.args[0]);
-                assert.deepEqual(undefined, RestAPI.app.listen.firstCall.args[1]);
+                RestAPI.start({expressPort: 21}, function(err, success) {
+                    assert.equal('some error', err);
+                    done();
+                });
             });
 
             it('should default to listen on port 3000', function() {
-                spyOnExpress();
+                stubListen('error');
                 stubPlugwise(null, {});
 
-                RestAPI.start({});
+                RestAPI.start({}, function(){});
                 
                 assert.equal(3000, RestAPI.app.listen.firstCall.args[0]);
             });
         });
         describe('Plugwise', function() {
             it('should call Plugwise.connect', function() {
-                spyOnExpress();
+                stubListen();
                 stubPlugwise(null, {});
 
-                RestAPI.start({});
+                RestAPI.start({expressPort: 3000});
 
                 assert.equal(1, RestAPI.plugwise.connect.callCount);
             });
 
             it('should call Plugwise.connect with the path to the serial port', function() {
-                spyOnExpress();
+                stubListen();
                 stubPlugwise(null, {});
 
                 RestAPI.start({serialPath: 'some-serial'});
@@ -79,7 +91,7 @@ describe('RestAPI', function() {
             });
 
             it('should call the callback with an error if plugwise.connect returns an error', function(done) {
-                spyOnExpress();
+                stubListen();
                 stubPlugwise('some error');
 
                 RestAPI.start({serialPath: 'some-serial'}, function(err, result) {
@@ -89,7 +101,7 @@ describe('RestAPI', function() {
             });
 
             it('should not call the callback with an error if plugwise.connect does not return an error', function(done) {
-                spyOnExpress();
+                stubListen();
                 stubPlugwise(null, {});
 
                 RestAPI.start({serialPath: 'some-serial'}, function(err, result) {
@@ -101,7 +113,8 @@ describe('RestAPI', function() {
 
         describe('Routes', function() {
             it('should not set any routes no routes are specified', function() {
-                spyOnExpress();
+                stubListen();
+                spyOnGet()
                 stubPlugwise(null, {});
 
                 RestAPI.start({serialPath: 'some-serial'});
@@ -117,7 +130,8 @@ describe('RestAPI', function() {
                         controller: '../test/integration/fixtures/rest-api/mockController2'
                     }],
                     controllers = [require('../fixtures/rest-api/mockController1'),require('../fixtures/rest-api/mockController2')];
-                spyOnExpress();
+                stubListen();
+                spyOnGet();
                 stubPlugwise(null, {});
 
                 RestAPI.start({serialPath: 'some-serial', routes: routes});

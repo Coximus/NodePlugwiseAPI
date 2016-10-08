@@ -2,10 +2,10 @@ var app = require('./app');
 
 var config = {
     expressPort: 3000,
-    serialPath: '/dev/cu.usbserial-A700drEa',
+    serialPath: process.argv[2],
     routes: [{
         path: '/switch/:address/:state',
-        controller: './switchController'
+        controller: './SwitchController'
     }]
 };
 app.restAPI.start(config, function(err, response) {
@@ -13,4 +13,5 @@ app.restAPI.start(config, function(err, response) {
         console.error(err);
         process.exit(1);
     }
+    console.log('Listening on port : ' + config.expressPort);
 });

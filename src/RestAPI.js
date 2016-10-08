@@ -17,7 +17,6 @@ var setupRoutes = function(routes, app) {
         var controller = require(route.controller);
         app.get(route.path, controller.handler);
     });
-    console.log('Routes Setup');
 }
 
 var start = function(config, callback) {
@@ -26,16 +25,17 @@ var start = function(config, callback) {
     this.app = this.app ? this.app : express();
     this.plugwise = this.plugwise ? this.plugwise : Plugwise;
 
-    this.app.listen(port, function(err, response) {
-        console.log('Listening on port : ' + port);
-    });
-    this.plugwise.connect(serialPath, function(err, plugwise) {
-        if(err) {
-            return callback ? callback(err) : null;
+    this.app.listen(port, function(error, response) {
+        if (error) {
+            return callback(error);
         }
-        console.log('Plugwise now connected');
-        setupRoutes(config.routes, this.app);
-        callback ? callback(null, plugwise) : null;
+        this.plugwise.connect(serialPath, function(err, plugwise) {
+            if(err) {
+                return callback ? callback(err) : null;
+            }
+            setupRoutes(config.routes, this.app);
+            callback ? callback(null, plugwise) : null;
+        }.bind(this));
     }.bind(this));
 }
 
