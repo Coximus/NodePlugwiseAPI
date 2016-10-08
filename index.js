@@ -1,4 +1,4 @@
-var app = require('./app');
+var app = require('./src/RestAPI');
 
 var config = {
     expressPort: 3000,
@@ -8,7 +8,7 @@ var config = {
         controller: './SwitchController'
     }]
 };
-app.restAPI.start(config, function(err, response) {
+app.start(config, function(err, response) {
     if (err) {
         console.error(err);
         process.exit(1);
